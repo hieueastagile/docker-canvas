@@ -1,0 +1,34 @@
+version: '2'
+
+
+services:
+  db:
+    image: postgres:9.3
+    environment:
+      - POSTGRES_USER=canvas
+      - POSTGRES_PASSWORD=canvas123
+      - POSTGRES_DB=canvas
+
+  web:
+    build: .
+    command: 'bundle exec puma -e production'
+    volumes:
+      - gems:/gems
+    ports:
+      - "9292:9292"
+    depends_on:
+      - db
+    dns:
+      - 8.8.8.8
+    environment:
+      - CANVAS_LMS_ADMIN_EMAIL=hieu.hoang@eastagile.com
+      - CANVAS_LMS_ADMIN_PASSWORD=aA@12345
+      - CANVAS_LMS_ADMIN_ACCOUNT=admin
+      - CANVAS_LMS_STATS_COLLECTION=opt_out
+      - JS_BUILD_NO_UGLIFY=true
+      - COMPILE_ASSETS_NPM_INSTALL=0
+      - RAILS_SERVE_STATIC_FILES=true
+
+volumes:
+  bundle:
+  gems:
