@@ -4,7 +4,9 @@ USER root
 
 ENV CANVAS_HOME /canvas
 ENV CANVAS_USER canvas
+ENV CANVAS_SHARED /canvas/shared
 ENV BUNDLE_PATH /gems
+ENV GEM_HOME /gems
 ENV PATH /gems/bin:$PATH
 ENV LC_ALL C.UTF-8
 
@@ -25,20 +27,23 @@ RUN apt-get update && \
 COPY supervisord.conf /etc/supervisord.conf
 COPY site.conf /etc/nginx/sites-available/default
 
-RUN mkdir -p $BUNDLE_PATH $CANVAS_HOME
+RUN chown -R www-data:www-data /var/lib/nginx
+RUN mkdir -p $BUNDLE_PATH $CANVAS_HOME $CANVAS_SHARED
+RUN useradd -m $CANVAS_USER && usermod -aG $CANVAS_USER www-data && chown -R $CANVAS_USER:$CANVAS_USER $CANVAS_HOME && chown -R $CANVAS_USER:$CANVAS_USER $BUNDLE_PATH
+USER $CANVAS_USER
+
 WORKDIR $CANVAS_HOME
-COPY ./canvas-lms/Gemfile      ${CANVAS_HOME}
-COPY ./canvas-lms/Gemfile.d    ${CANVAS_HOME}/Gemfile.d
-COPY ./canvas-lms/config       ${CANVAS_HOME}/config
-COPY ./canvas-lms/gems         ${CANVAS_HOME}/gems
-COPY ./canvas-lms/script       ${CANVAS_HOME}/script
-COPY ./canvas-lms/package.json ${CANVAS_HOME}
-COPY ./canvas-lms/yarn.lock    ${CANVAS_HOME}
+
+COPY --chown=canvas ./canvas-lms/Gemfile      ${CANVAS_HOME}
+COPY --chown=canvas ./canvas-lms/Gemfile.d    ${CANVAS_HOME}/Gemfile.d
+COPY --chown=canvas ./canvas-lms/config       ${CANVAS_HOME}/config
+COPY --chown=canvas ./canvas-lms/gems         ${CANVAS_HOME}/gems
+COPY --chown=canvas ./canvas-lms/script       ${CANVAS_HOME}/script
+COPY --chown=canvas ./canvas-lms/package.json ${CANVAS_HOME}
+COPY --chown=canvas ./canvas-lms/yarn.lock    ${CANVAS_HOME}
 RUN bundle install && yarn install
 
-COPY ./canvas-lms $CANVAS_HOME
-RUN useradd -m canvas && usermod -aG canvas www-data && chown -R $CANVAS_USER:$CANVAS_USER $CANVAS_HOME && chown -R $CANVAS_USER:$CANVAS_USER $BUNDLE_PATH
-USER $CANVAS_USER
+COPY --chown=canvas ./canvas-lms $CANVAS_HOME
 
 ENV RAILS_ENV 'production'
 RUN mkdir -p log tmp/pids public/assets app/stylesheets/brandable_css_brands && \
@@ -49,3 +54,5 @@ RUN mkdir -p log tmp/pids public/assets app/stylesheets/brandable_css_brands && 
     bundle exec rake canvas:compile_assets && \
     chown $CANVAS_USER config/*.yml && \
     chmod 400 config/*.yml
+
+USER root
