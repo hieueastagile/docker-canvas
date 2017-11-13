@@ -11,11 +11,11 @@ services:
 
   web:
     build: .
-    command: 'bundle exec puma -e production'
+    command: '/usr/bin/supervisord -n -c /etc/supervisord.conf'
     volumes:
       - gems:/gems
     ports:
-      - "9292:9292"
+      - "80:80"
     depends_on:
       - db
     dns:
@@ -25,9 +25,6 @@ services:
       - CANVAS_LMS_ADMIN_PASSWORD=aA@12345
       - CANVAS_LMS_ADMIN_ACCOUNT=admin
       - CANVAS_LMS_STATS_COLLECTION=opt_out
-      - JS_BUILD_NO_UGLIFY=true
-      - COMPILE_ASSETS_NPM_INSTALL=0
-      - RAILS_SERVE_STATIC_FILES=true
 
 volumes:
   bundle:
