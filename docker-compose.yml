@@ -6,7 +6,7 @@ services:
     image: postgres:9.3
     environment:
       - POSTGRES_USER=canvas
-      - POSTGRES_PASSWORD=canvas123
+      - POSTGRES_PASSWORD=aA@12345
       - POSTGRES_DB=canvas
 
   web:
@@ -14,7 +14,7 @@ services:
     command: '/usr/bin/supervisord -n -c /etc/supervisord.conf'
     volumes:
       - gems:/gems
-      - app:/canvas
+      - ./canvas-lms:/canvas
     ports:
       - "80:80"
     depends_on:
@@ -23,7 +23,7 @@ services:
     dns:
       - 8.8.8.8
     environment:
-      - CANVAS_LMS_ADMIN_EMAIL=hieu.hoang@eastagile.com
+      - CANVAS_LMS_ADMIN_EMAIL=involvio+lti@eastagile.com
       - CANVAS_LMS_ADMIN_PASSWORD=aA@12345
       - CANVAS_LMS_ADMIN_ACCOUNT=admin
       - CANVAS_LMS_STATS_COLLECTION=opt_out
@@ -33,13 +33,14 @@ services:
     command: 'script/canvas_init run'
     volumes:
       - gems:/gems
+      - ./canvas-lms:/canvas
     depends_on:
       - db
       - redis
     dns:
       - 8.8.8.8
     environment:
-      - CANVAS_LMS_ADMIN_EMAIL=hieu.hoang@eastagile.com
+      - CANVAS_LMS_ADMIN_EMAIL=involvio+lti@eastagile.com
       - CANVAS_LMS_ADMIN_PASSWORD=aA@12345
       - CANVAS_LMS_ADMIN_ACCOUNT=admin
       - CANVAS_LMS_STATS_COLLECTION=opt_out
