@@ -45,7 +45,7 @@ bind 'unix:///canvas/shared/puma.sock'
     database: canvas
     host: localhost
     username: canvas
-    password: aA#12345
+    password: 123123
     timeout: 5000
   ```
   - domain.yml
